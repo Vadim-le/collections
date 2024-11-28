@@ -39,7 +39,7 @@ app.add_middleware(
 	Для создания демона:
 		1)Создайте файл демона: sudo nano /etc/systemd/system/Название.service
 		Вставьте следующий код в файл: 
-			[Unit]
+			```[Unit]
 			Description=React App
 			After=network.target
 
@@ -51,7 +51,8 @@ app.add_middleware(
 
 			[Install]
 			WantedBy=multi-user.target
-4) Открыть порт в firewall (1 раз) - sudo ufw allow 5111
+   ```
+5) Открыть порт в firewall (1 раз) - sudo ufw allow 5111
 5)Перезагрузите демон: sudo systemctl daemon-reload
   Перезапустите демон: sudo systemctl restart CollectionStart
   Проверьте статус демона: sudo systemctl status CollectionStart
