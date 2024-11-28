@@ -1,26 +1,33 @@
-Backend
-При скачивании установить все бибилиотеки, для запуска - uvicorn main:app --reload
-Место размещения: var/va/endpoints/pythonenv/services_and_components
-collections_logos - папка для хранения изображений сервисов
+# README
 
-В main - нужно разрешить получать запросы с порта 5111:
+## Backend
+При скачивании установить все бибилиотеки, для запуска - uvicorn main:app --reload
+### Место размещения
+`/var/va/endpoints/pythonenv/services_and_components`
+- **collections_logos** - папка для хранения изображений сервисов.
+
+### Настройка CORS
+В файле `main.py` нужно разрешить получать запросы с порта 5111:
+
+```python
 origins = [
     "http://localhost:3000",
     "http://51.250.4.123:5111",
 ]
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,  
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
-)
+)```
 
 В database.py - настроить подключениек бд, ввести данные: host, user, password, db_name, port
 Для перезагрузки демона бэкенда: sudo systemctl restart fastapiva.service
 Для проверки статуса: sudo systemctl status fastapiva.service
 
-Frontend
+## Frontend
 при скачивании - npm install сначала сделать
 Место размещения: var/service_collection/serviceCollection
 Файл демон: CollectionStart.service
