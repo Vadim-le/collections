@@ -36,23 +36,23 @@ app.add_middleware(
 1) Собрать проект: npm run dev
 2) Разместить по маршруту: var/service_collection/serviceCollection
 3) Файл демона уже создан
-	Для создания демона:
-		1)Создайте файл демона: sudo nano /etc/systemd/system/Название.service
-		Вставьте следующий код в файл: 
-			```[Unit]
-			Description=React App
-			After=network.target
+Для создания демона:
+1. Создайте файл демона: sudo nano /etc/systemd/system/Название.service
+Вставьте следующий код в файл: 
+```[Unit]
+Description=React App
+After=network.target
 
-			[Service]
-			Type=simple
-			WorkingDirectory=/путь/к/react-приложению (build)
-			ExecStart=/usr/bin/serve -s build -l ПОРТ - сейчас на 5111
-			Restart=always
+[Service]
+Type=simple
+WorkingDirectory=/путь/к/react-приложению (build)
+ExecStart=/usr/bin/serve -s build -l ПОРТ - сейчас на 5111
+Restart=always
 
-			[Install]
-			WantedBy=multi-user.target
+[Install]
+WantedBy=multi-user.target
    ```
-5) Открыть порт в firewall (1 раз) - sudo ufw allow 5111
+4) Открыть порт в firewall (1 раз) - sudo ufw allow 5111
 5)Перезагрузите демон: sudo systemctl daemon-reload
   Перезапустите демон: sudo systemctl restart CollectionStart
   Проверьте статус демона: sudo systemctl status CollectionStart
