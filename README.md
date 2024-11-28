@@ -21,7 +21,8 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
-)```
+)
+```
 
 В database.py - настроить подключениек бд, ввести данные: host, user, password, db_name, port
 Для перезагрузки демона бэкенда: sudo systemctl restart fastapiva.service
