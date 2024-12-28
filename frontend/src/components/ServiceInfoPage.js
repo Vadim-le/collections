@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ReactComponent as BackIcon } from './back.svg';
 import EditDeleteServiceForm from './EditDeleteServiceForm';
 import { toast } from 'react-toastify';
-
+import axios from 'axios';
 
 function ServiceInfoPage() {
   const { serviceName } = useParams();
@@ -22,6 +22,7 @@ function ServiceInfoPage() {
   const [authMethod, setAuthMethod] = useState('var1');
   const [authType, setAuthType] = useState('');
   const [clientId, setClientId] = useState('');
+  const [userID, setUserId] = useState('');
   const [clientSecret, setClientSecret] = useState('');
   const [clientUrl, setClientUrl] = useState('');
   const [scope, setScope] = useState('');
@@ -121,18 +122,25 @@ function ServiceInfoPage() {
 
   const handleNewServiceSubmit = async (event) => {
     event.preventDefault();
+  
     let requestBody = { serviceName };
     let url;
-
+  
+    // Определение параметров запроса в зависимости от выбранного метода аутентификации
     switch (authMethod) {
-      case 'var2':
-        requestBody.token = apiKey;
-        requestBody.paramName = paramName;
-        requestBody.auth_id = authType === 'Header' ? 1 : 2;
+      case 'var2': {
+        requestBody = {
+          ...requestBody,
+          token: apiKey,
+          paramName,
+          auth_id: authType === 'Header' ? 1 : 2,
+          userID: parseInt(userID, 10),
+        };
         url = '/api/create-auth-service';
         break;
-
-      case 'var3':
+      }
+  
+      case 'var3': {
         requestBody = {
           ...requestBody,
           clientId,
@@ -140,35 +148,44 @@ function ServiceInfoPage() {
           clientUrl,
           authorizationContentType,
           authorizationUrl,
-          scope
+          scope,
+          userID,
         };
         url = '/api/create-oauth-service';
         break;
-
-      default:
-        break;
-    }
-
-    try {
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(requestBody)
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to create service.');
       }
-
-      console.log('Service created successfully.');
-    } catch (error) {
-      console.error('Error creating service:', error);
+  
+      default:
+        console.error('Invalid authentication method selected.');
+        return;
     }
-    
-    setShowForm(false);
+  
+    try {
+      // Выполнение POST-запроса с параметрами
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_URL}${url}`,
+        null, // Тело запроса пустое
+        {
+          params: requestBody, // Параметры передаются как query
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+  
+      // Проверка успешности ответа
+      if (response.status >= 200 && response.status < 300) {
+        console.log('Service created successfully:', response.data);
+        setShowForm(false); // Закрытие формы после успешного выполнения
+      } else {
+        console.error('Unexpected server response:', response.status, response.data);
+      }
+    } catch (error) {
+      // Обработка ошибок
+      console.error('Error creating service:', error.response || error.message);
+    }
   };
+  
 
   const handleEditFormOpen = () => {
     setEditFormOpen(true);
@@ -327,6 +344,17 @@ function ServiceInfoPage() {
                       className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     />
                   </div>
+                  <div>
+                    <label htmlFor="userid" className="block text-sm font-medium text-gray-700">User ID:</label>
+                    <input
+                      required
+                      type="number"
+                      id="userid"
+                      value={userID}
+                      onChange={(e) => setUserId(e.target.value)}
+                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    />
+                  </div>
                 </div>
               )}
 
@@ -396,6 +424,17 @@ function ServiceInfoPage() {
                       id="authorization_content_type"
                       value={authorizationContentType}
                       onChange={(e) => setAuthorizationContentType(e.target.value)}
+                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="user_id" className="block text-sm font-medium text-gray-700">User ID:</label>
+                    <input
+                      required
+                      type="number"
+                      id="User_id"
+                      value={userID}
+                      onChange={(e) => setUserId(e.target.value)}
                       className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     />
                   </div>
