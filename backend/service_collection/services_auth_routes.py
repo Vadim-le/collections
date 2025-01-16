@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import JSONResponse
-from service_collection.database import db
+from .database import db
 from pydantic import BaseModel
 
 collection_auth_route = APIRouter()
@@ -14,15 +14,21 @@ class AuthService(BaseModel):
 
 def get_db():
     return db.get_connection()  # Возвращаем соединение
+    
 @collection_auth_route.post('/api/create-auth-service')
-async def create_auth_service(auth_service: AuthService, db=Depends(get_db)):
+async def create_auth_service(
+    serviceName: str,
+    token: str,
+    paramName: str,
+    auth_id: int,
+    userID: int,
+    db=Depends(get_db)
+):
     cursor = None
     try:
-        cursor = db.cursor()
-        print (1)
-        # Проверяем, существует ли сервис с таким именем
+        cursor = db.cursor()        # Проверяем, существует ли сервис с таким именем
         check_query = 'SELECT * FROM services.service WHERE name = %s'
-        cursor.execute(check_query, (auth_service.serviceName,))
+        cursor.execute(check_query, (serviceName,))
         check_result = cursor.fetchone()
 
         if not check_result:
@@ -30,19 +36,18 @@ async def create_auth_service(auth_service: AuthService, db=Depends(get_db)):
 
         service_id = check_result['id']
         
-        print(auth_service.token, service_id, auth_service.auth_id, auth_service.paramName, auth_service.userID)
         # Вставляем новый сервис
         insert_query = '''
-            INSERT INTO services.default_auth ("token", service_id, type_id, "param_name", user_id)
+            INSERT INTO services.default_auth ("token", service_id, type_id, user_id, "param_name")
             VALUES (%s, %s, %s, %s, %s)
         '''
-        cursor.execute(insert_query, (auth_service.token, service_id, auth_service.auth_id, auth_service.paramName, auth_service.userID))
+        cursor.execute(insert_query, (token, service_id, auth_id, userID, paramName))
         
         # Подтверждение транзакции
         db.commit()  
         print("Авторизация добавлена в базу данных.")
         
-        return JSONResponse(content={'message': f'Authorisation of {auth_service.serviceName} added successfully.'}, status_code=201)
+        return JSONResponse(content={'message': f'Authorisation of {serviceName} added successfully.'}, status_code=201)
 
     except Exception as error:
         print('Error inserting service:', error)
@@ -107,6 +112,4 @@ async def create_oauth_service(
                 cursor.close()
             except Exception as cursor_close_error:
                 print(f"Ошибка при закрытии курсора: {cursor_close_error}")
-
-
 

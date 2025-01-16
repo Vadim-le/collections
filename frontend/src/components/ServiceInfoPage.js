@@ -3,7 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ReactComponent as BackIcon } from './back.svg';
 import EditDeleteServiceForm from './EditDeleteServiceForm';
 import { toast } from 'react-toastify';
-import axios from 'axios';
 
 function ServiceInfoPage() {
   const { serviceName } = useParams();
@@ -161,28 +160,30 @@ function ServiceInfoPage() {
     }
   
     try {
-      // Выполнение POST-запроса с параметрами
-      const response = await axios.post(
-        `${process.env.REACT_APP_API_URL}${url}`,
-        null, // Тело запроса пустое
-        {
-          params: requestBody, // Параметры передаются как query
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-  
+      // Формирование URL с query параметрами
+      const queryParams = new URLSearchParams(requestBody).toString();
+      const fullUrl = `${process.env.REACT_APP_API_URL}${url}?${queryParams}`;
+    
+      // Выполнение POST-запроса
+      const response = await fetch(fullUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+    
       // Проверка успешности ответа
-      if (response.status >= 200 && response.status < 300) {
-        console.log('Service created successfully:', response.data);
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Service created successfully:', data);
         setShowForm(false); // Закрытие формы после успешного выполнения
       } else {
-        console.error('Unexpected server response:', response.status, response.data);
+        const errorData = await response.json();
+        console.error('Unexpected server response:', response.status, errorData);
       }
     } catch (error) {
       // Обработка ошибок
-      console.error('Error creating service:', error.response || error.message);
+      console.error('Error creating service:', error.message);
     }
   };
   
