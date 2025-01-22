@@ -216,24 +216,23 @@ function ServiceCard() {
   const handleNewServiceSubmit = async event => {
     event.preventDefault();
 
-    if (!newService.image) {
-        alert("Пожалуйста, выберите изображение.");
-        return;
-    }
-
     const formData = new FormData();
     formData.append('uri', newService.uri);
     formData.append('name', newService.name);
     formData.append('categoryId', parseInt(newService.category_id, 10)); 
     formData.append('description', newService.description);
-    formData.append('image', newService.image); 
+
+    // Добавляем изображение только если оно выбрано
+    if (newService.image) {
+        formData.append('image', newService.image); 
+    }
 
     console.log("Form data:", {
         uri: newService.uri,
         name: newService.name,
         categoryId: newService.category_id,
         description: newService.description,
-        image: newService.image.name
+        image: newService.image ? newService.image.name : 'Не выбрано' // Логируем имя файла или сообщение
     });
 
     try {
@@ -251,7 +250,7 @@ function ServiceCard() {
             const errorData = await response.json();
             alert(`Ошибка: ${errorData.detail || 'Неизвестная ошибка'}`);
         }
-    } catch ( error) {
+    } catch (error) {
         console.error('Ошибка при добавлении нового сервиса:', error);
     }
 };
